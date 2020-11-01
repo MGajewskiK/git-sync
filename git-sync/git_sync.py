@@ -79,7 +79,7 @@ def setup_repo(repo, dest, branch, force):
         # stash changes if force syncing
         if force:
             sh(["git", "stash", "--all"], cwd=dest)
-            typer.echo(f"All chanes from {current_branch} stashed!")
+            typer.echo(f"All changes from {current_branch} stashed!")
         else:
             if modified_status:
                 raise ValueError(
@@ -175,12 +175,12 @@ def main(
     elif not branch:
         branch = "master"
 
-    setup_repo(repo, dest, branch, force)
     while True:
+        setup_repo(repo, dest, branch, force)
         sync_repo(repo, dest, branch, rev)
         if run_once:
             break
-        click.echo("Waiting {wait} seconds...".format(**locals()))
+        typer.echo("Waiting {wait} seconds...\n".format(**locals()))
         time.sleep(wait)
 
 

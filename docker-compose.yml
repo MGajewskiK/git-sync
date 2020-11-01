@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+  git-sync:
+    container_name: git-sync
+    build: .
+    # user: "${UID}:${GID}"
+    environment:
+      GIT_SYNC_DEST: '/repo'
+      GIT_SYNC_WAIT: 30
+      GIT_SYNC_FORCE: 'True'
+    volumes:
+      - /home/mgajewskik/repos/web_blocker:/repo:rw
+    restart: unless-stopped

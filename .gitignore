@@ -63,3 +63,6 @@ target/
 
 # Vim folder
 .vim/
+
+# ssh key
+id_rsa
