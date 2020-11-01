@@ -29,7 +29,7 @@ def get_repo_at(dest):
     return current_remote.lower(), current_branch.lower()
 
 
-def setup_repo(repo, dest, branch):
+def setup_repo(repo, dest, branch, force):
     """
     Clones `branch` of remote `repo` to `dest`, if it doesn't exist already.
     Raises an error if a different repo or branch is found.
@@ -75,16 +75,22 @@ def setup_repo(repo, dest, branch):
         # ahead_status: commited but not pushed
         modified_status = sh(shlex.split("git status -s"), cwd=dest)
         ahead_status = sh(shlex.split("git status -sb"), cwd=dest)[3:]
-        if modified_status:
-            raise ValueError(
-                "There are uncommitted changes at {dest} that syncing "
-                "would overwrite".format(**locals())
-            )
-        if "[ahead " in ahead_status:
-            raise ValueError(
-                "This branch is ahead of the requested repo and syncing would "
-                "overwrite the changes: {ahead_status}".format(**locals())
-            )
+
+        # stash changes if force syncing
+        if force:
+            sh(["git", "stash", "--all"], cwd=dest)
+            typer.echo(f"All chanes from {current_branch} stashed!")
+        else:
+            if modified_status:
+                raise ValueError(
+                    "There are uncommitted changes at {dest} that syncing "
+                    "would overwrite".format(**locals())
+                )
+            if "[ahead " in ahead_status:
+                raise ValueError(
+                    "This branch is ahead of the requested repo and syncing would "
+                    "overwrite the changes: {ahead_status}".format(**locals())
+                )
 
 
 def sync_repo(repo, dest, branch, rev):
@@ -136,6 +142,11 @@ def main(
         envvar="GIT_SYNC_BRANCH",
         help="The branch to sync. Defaults to inferring from `repo` (if already cloned), otherwise defaults to master.",
     ),
+    force: bool = typer.Option(
+        False,
+        envvar="GIT_SYNC_FORCE",
+        help="Sync changes forcefully, stashes all the changes first.",
+    ),
     rev: str = typer.Option(
         None, envvar="GIT_SYNC_REV", help="The revision to sync. Defaults to HEAD."
     ),
@@ -164,7 +175,7 @@ def main(
     elif not branch:
         branch = "master"
 
-    setup_repo(repo, dest, branch)
+    setup_repo(repo, dest, branch, force)
     while True:
         sync_repo(repo, dest, branch, rev)
         if run_once:
