@@ -8,11 +8,7 @@ import shlex
 import subprocess
 import sys
 import time
-# try to be py2/3 compatible
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 def sh(*args, **kwargs):
@@ -147,6 +143,11 @@ def git_sync(repo, dest, branch, rev, wait, run_once, debug):
             break
         click.echo('Waiting {wait} seconds...'.format(**locals()))
         time.sleep(wait)
+
+
+def main():
+    print("Hello World")
+    print("Hello World")
 
 
 if __name__ == '__main__':
