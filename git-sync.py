@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 import click
@@ -10,13 +10,15 @@ import sys
 import time
 # try to be py2/3 compatible
 try:
-     from urllib.parse import urlparse
+    from urllib.parse import urlparse
 except ImportError:
-     from urlparse import urlparse
+    from urlparse import urlparse
+
 
 def sh(*args, **kwargs):
     """ Get subprocess output"""
     return subprocess.check_output(*args, **kwargs).decode().strip()
+
 
 def get_repo_at(dest):
     if not os.path.exists(os.path.join(dest, '.git')):
@@ -31,6 +33,7 @@ def get_repo_at(dest):
             cwd=dest)
 
     return current_remote.lower(), current_branch.lower()
+
 
 def setup_repo(repo, dest, branch):
     """
@@ -58,7 +61,7 @@ def setup_repo(repo, dest, branch):
         parsed_remote = urlparse(current_remote)
         parsed_repo = urlparse(repo)
 
-        if (    parsed_repo.netloc != parsed_remote.netloc
+        if (parsed_repo.netloc != parsed_remote.netloc
                 or parsed_repo.path != parsed_remote.path):
             raise ValueError(
                 'Requested repo `...{repo_name}` but destination already '
@@ -110,6 +113,7 @@ def sync_repo(repo, dest, branch, rev):
         'Finished syncing {repo_name}:{branch} at {t:%Y-%m-%d %H:%M:%S}'.format(
             **locals(), t=datetime.datetime.now()))
 
+
 @click.command()
 @click.option('--dest', '-d', envvar='GIT_SYNC_DEST', default=os.getcwd(), help='The destination path. Defaults to the current working directory; can also be set with envvar GIT_SYNC_DEST.')
 @click.option('--repo', '-r', envvar='GIT_SYNC_REPO', default='', help='The url of the remote repo to sync. Defaults to inferring from `dest`; can also be set with envvar GIT_SYNC_REPO.')
@@ -126,7 +130,7 @@ def git_sync(repo, dest, branch, rev, wait, run_once, debug):
 
     if not debug:
         sys.excepthook = (
-            lambda etype, e, tb : print("{}: {}".format(etype.__name__, e)))
+            lambda etype, e, tb: print("{}: {}".format(etype.__name__, e)))
 
     # infer repo/branch
     if not repo and not branch:
@@ -143,6 +147,7 @@ def git_sync(repo, dest, branch, rev, wait, run_once, debug):
             break
         click.echo('Waiting {wait} seconds...'.format(**locals()))
         time.sleep(wait)
+
 
 if __name__ == '__main__':
     git_sync()
